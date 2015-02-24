@@ -12,20 +12,20 @@ import android.graphics.Paint;
 public class CircleTimelineObject implements TimelineObject {
 
     Paint pt = new Paint(Paint.ANTI_ALIAS_FLAG);
-    short diameter = (short) Luna.dp(10);
+    short diameter = (short) Luna.dp(5);
 
     {
         pt.setStrokeWidth(Luna.dp(2));
     }
 
-    private int when;
+    private long when;
 
-    public CircleTimelineObject(int when) {
+    public CircleTimelineObject(long when) {
         this.when = when;
     }
 
     @Override
-    public void draw(Canvas cvs, int x_where, int y_where, float zoom) {
+    public void draw(Canvas cvs, int x_where, int y_where, double zoom) {
         pt.setStyle(Paint.Style.FILL);
         pt.setColor(Colours.NUMIX_GRAY);
         cvs.drawCircle(x_where, y_where, diameter, pt);

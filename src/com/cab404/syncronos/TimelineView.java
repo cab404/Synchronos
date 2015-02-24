@@ -28,20 +28,111 @@ public class TimelineView extends View {
     }
 
 
+    /**
+     * Last X.
+     */
+    float l_x = -1;
+    /**
+     * Last speed
+     */
+    float l_s = -1;
+
+    /**
+     * Last length between selected points.
+     */
+    float l_l = -1;
+
+    /**
+     * Start center point of pan
+     */
+    long d_s_p = -1;
+
+    /**
+     * Last point count
+     */
+    int l_p_c = 0;
+
+    /**
+     * Kinetic scroll - current force
+     */
+    float kinetic_x = 0;
+
+    /**
+     * Speed of kinetic scroll burnout.
+     * 1 means scroll will never stop, 0 means it will stop immediately.
+     */
+    final static float KINETIC_DAMPING = 0.95f;
+
+    /**
+     * How much of additional extent data to load on extent change, in screen pixels.
+     * Allows to make calls to DB less frequent, thus increasing performance.
+     */
+    final static long OBJECT_QUERY_PADDING = 80;
+    /**
+     * How much times does loaded extent has to be bigger
+     * than currently visible area to be reloaded. Zoom in memory optimisation.
+     */
+    final static float SHRINK_EXTENT = 5f;
+
+    boolean update_kinetics = false;
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
-        if (event.getPointerCount() == 1) {
-            if (event.getHistorySize() >= 1) {
-                float x = event.getHistoricalX(0) - event.getX();
-                timeOffset += x;
-                System.out.println("pChange " + x);
-                onPositionChange();
-            }
+        update_kinetics = false;
+
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            l_x = -1;
         }
 
-        return true;
+        if (event.getAction() == MotionEvent.ACTION_UP) {
+            if (l_p_c == 1 && l_x >= 0) {
+                kinetic_x = l_s;
+                update_kinetics = true;
+            }
 
+            l_x = -1;
+            l_l = -1;
+        }
+
+        if (event.getPointerCount() == 1) {
+            if (l_x >= 0) {
+                l_s = l_x - event.getX();
+                addToTime((long) (l_s / zoom));
+                updateObjects();
+            }
+            l_x = event.getX();
+        } else {
+            l_x = -1;
+        }
+
+        if (event.getPointerCount() == 2) {
+            float len = Math.abs(event.getX(0) - event.getX(1));
+            float c_x = (event.getX(0) - event.getX(1)) / 2 + event.getX(1);
+
+            if (d_s_p < 0)
+                d_s_p = timeOffset + (long) (c_x / zoom);
+
+            System.out.println("BPoint = " + c_x);
+            System.out.println("DSPoint = " + d_s_p);
+
+            if (l_l >= 0)
+                zoom /= l_l / len;
+
+            // Moving initial center to current center
+            setTimeOffset(d_s_p - (long) ((c_x / zoom)));
+
+            updateObjects();
+
+            l_l = len;
+        } else {
+            l_l = -1;
+            d_s_p = -1;
+        }
+
+        l_p_c = event.getPointerCount();
+
+        return true;
     }
 
     /**
@@ -53,7 +144,7 @@ public class TimelineView extends View {
     protected TimelineObjectStorage objects;
     protected Iterable<TimelineObject> current;
 
-    protected float zoom = 1;
+    protected double zoom = 1;
     protected long timeOffset = 0;
 
     protected int color = Colours.NUMIX_RED;
@@ -66,11 +157,17 @@ public class TimelineView extends View {
         this.color = color;
     }
 
-    public float getZoom() {
+    public double getZoom() {
         return zoom;
     }
 
-    public void setZoom(float zoom) {
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        updateObjects();
+    }
+
+    public void setZoom(double zoom) {
         this.zoom = zoom;
     }
 
@@ -79,7 +176,7 @@ public class TimelineView extends View {
     }
 
     public void setTimeOffset(long timeOffset) {
-        this.timeOffset = timeOffset;
+        addToTime(timeOffset - this.timeOffset);
     }
 
     protected void drawBackLine() {
@@ -89,13 +186,32 @@ public class TimelineView extends View {
 
     public void setStorage(TimelineObjectStorage storage) {
         this.objects = storage;
-        onPositionChange();
+        updateObjects();
     }
 
-    public void onPositionChange() {
-        int length = (int) (getWidth() / zoom);
-        current = objects.getObjects(timeOffset, timeOffset + length, zoom);
+    long loadedExtentStart = Long.MAX_VALUE;
+    long loadedExtentEnd = Long.MIN_VALUE;
+
+    public void updateObjects() {
+        // Length of visible timeline part
+        long length = (long) (getWidth() / zoom);
+        // Loading padding
+        long padding = (long) (OBJECT_QUERY_PADDING / zoom);
+
+        if (timeOffset < loadedExtentStart || timeOffset + length > loadedExtentEnd
+                || length * SHRINK_EXTENT < loadedExtentEnd - loadedExtentStart) {
+
+            loadedExtentStart = timeOffset - padding;
+            loadedExtentEnd = timeOffset + length + padding;
+
+            System.out.println("Loaded " + loadedExtentStart + ":" + loadedExtentEnd);
+            System.out.println("now " + timeOffset + ":" + (timeOffset + length));
+            System.out.println("Shrink " + timeOffset + ":" + (timeOffset + length));
+
+            current = objects.getObjects(loadedExtentStart, loadedExtentEnd, zoom);
+        }
         invalidate();
+
     }
 
     protected void drawNotch(int x, int thick, int length) {
@@ -110,10 +226,23 @@ public class TimelineView extends View {
         cv.drawRect(rl, rt, rr, rb, pt);
     }
 
+    public void addToTime(long howmuch) {
+        if (howmuch < 0) {
+            if (timeOffset + howmuch < 0)
+                timeOffset = 0;
+            else
+                timeOffset += howmuch;
+        } else {
+            if (timeOffset + howmuch < timeOffset)
+                timeOffset = Long.MAX_VALUE;
+            else
+                timeOffset += howmuch;
+        }
+    }
+
     @Override
     public void onDraw(Canvas canvas) {
         Luna.preinit(getContext());
-
 
         if (pt == null) {
             pt = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -135,7 +264,15 @@ public class TimelineView extends View {
             int start = (int) ((obj.getStartTime() - timeOffset) * zoom);
             obj.draw(cv, start, half_height, zoom);
         }
-        System.out.println("Drawn " + how_much + " objects");
+
+        if (update_kinetics) {
+            addToTime((long) (kinetic_x / zoom));
+            kinetic_x *= KINETIC_DAMPING;
+            updateObjects();
+        }
+
+        if (Math.abs(kinetic_x) < 0.1)
+            update_kinetics = false;
 
     }
 

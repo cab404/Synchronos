@@ -5,7 +5,7 @@ import android.content.res.Resources;
 import android.util.Log;
 
 /**
- * Sorry for no comments!
+ * Utility methods. Tribute for Princess Luna.
  * Created at 8:59 on 21.02.15
  *
  * @author cab404

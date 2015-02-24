@@ -14,7 +14,7 @@ public class SimpleObjectStorage implements TimelineObjectStorage {
     public List<TimelineObject> objects = new ArrayList<>();
 
     @Override
-    public Iterable<TimelineObject> getObjects(long start, long end, float zoom) {
+    public Iterable<TimelineObject> getObjects(long start, long end, double zoom) {
         ArrayList<TimelineObject> objects = new ArrayList<>();
 
         for (TimelineObject obj : this.objects)
