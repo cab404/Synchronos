@@ -1,4 +1,4 @@
-package com.cab404.syncronos.eyeofharmony;
+package com.cab404.synchronos.eyeofharmony;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -6,8 +6,8 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import com.cab404.syncronos.Colours;
-import com.cab404.syncronos.Luna;
+import com.cab404.synchronos.Colours;
+import com.cab404.synchronos.Luna;
 
 /**
  * Sorry for no comments!
@@ -119,9 +119,6 @@ public class TimelineView extends View {
             if (d_s_p < 0)
                 d_s_p = timeOffset + (long) (c_x / zoom);
 
-            System.out.println("BPoint = " + c_x);
-            System.out.println("DSPoint = " + d_s_p);
-
             if (l_l >= 0)
                 setZoom(zoom / (l_l / len));
 
@@ -192,13 +189,16 @@ public class TimelineView extends View {
 
 
     public void setZoom(double zoom) {
-        double minimal_zoom = ((double) getWidth()) / (upBorder - downBorder);
-        if (zoom > minimal_zoom) {
-            this.zoom = zoom;
-
-        } else {
+        double minimal_zoom = ((double) getWidth()) / (upBorder - downBorder); // Everything.
+        double maximum_zoom = ((double) getWidth()) / 1000; // 1 second.
+        if (zoom > minimal_zoom)
+            if (zoom < maximum_zoom)
+                this.zoom = zoom;
+            else
+                this.zoom = maximum_zoom;
+        else
             this.zoom = minimal_zoom;
-        }
+
     }
 
     public long getTimeOffset() {
@@ -231,26 +231,10 @@ public class TimelineView extends View {
             loadedExtentStart = timeOffset - padding;
             loadedExtentEnd = timeOffset + length + padding;
 
-            System.out.println("Loaded " + loadedExtentStart + ":" + loadedExtentEnd);
-            System.out.println("now " + timeOffset + ":" + (timeOffset + length));
-            System.out.println("Shrink " + timeOffset + ":" + (timeOffset + length));
-
             current = objects.getObjects(loadedExtentStart, loadedExtentEnd, zoom);
         }
         invalidate();
 
-    }
-
-    protected void drawNotch(int x, int thick, int length) {
-        int half_height = cv.getHeight() / 2;
-        thick = thick > 0 ? thick : 1;
-
-        int rl = x - thick / 2;
-        int rr = x + thick / 2 + (thick % 2 == 1 ? 0 : 1);
-        int rt = half_height - length / 2;
-        int rb = half_height + length / 2;
-
-        cv.drawRect(rl, rt, rr, rb, pt);
     }
 
     public void addToTime(long howmuch) {

@@ -1,4 +1,4 @@
-package com.cab404.syncronos;
+package com.cab404.synchronos;
 
 import android.content.Context;
 import android.content.res.Resources;

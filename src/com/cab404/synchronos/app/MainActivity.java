@@ -1,13 +1,13 @@
-package com.cab404.syncronos.app;
+package com.cab404.synchronos.app;
 
 import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
-import com.cab404.syncronos.R;
-import com.cab404.syncronos.eyeofharmony.TimelineView;
-import com.cab404.syncronos.impl.CircleTimelineObject;
-import com.cab404.syncronos.impl.SimpleObjectStorage;
-import com.cab404.syncronos.impl.TimeIndicatorsLayer;
+import com.cab404.synchronos.R;
+import com.cab404.synchronos.eyeofharmony.TimelineView;
+import com.cab404.synchronos.impl.CircleTimelineObject;
+import com.cab404.synchronos.impl.SimpleObjectStorage;
+import com.cab404.synchronos.impl.TimeIndicatorsLayer;
 
 import java.util.concurrent.TimeUnit;
 

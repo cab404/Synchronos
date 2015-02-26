@@ -1,10 +1,10 @@
-package com.cab404.syncronos.impl;
+package com.cab404.synchronos.impl;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import com.cab404.syncronos.Colours;
-import com.cab404.syncronos.Luna;
-import com.cab404.syncronos.eyeofharmony.TimelineObject;
+import com.cab404.synchronos.Colours;
+import com.cab404.synchronos.Luna;
+import com.cab404.synchronos.eyeofharmony.TimelineObject;
 
 /**
  * Sorry for no comments!

@@ -1,7 +1,7 @@
-package com.cab404.syncronos.app;
+package com.cab404.synchronos.app;
 
 import android.app.Application;
-import com.cab404.syncronos.Luna;
+import com.cab404.synchronos.Luna;
 
 /**
  * Sorry for no comments!

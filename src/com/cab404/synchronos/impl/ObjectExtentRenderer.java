@@ -1,7 +1,7 @@
-package com.cab404.syncronos.impl;
+package com.cab404.synchronos.impl;
 
 import android.graphics.Canvas;
-import com.cab404.syncronos.eyeofharmony.TimelineLayer;
+import com.cab404.synchronos.eyeofharmony.TimelineLayer;
 
 /**
  * Sorry for no comments!

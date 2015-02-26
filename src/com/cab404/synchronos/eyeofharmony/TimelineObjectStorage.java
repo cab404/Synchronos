@@ -1,4 +1,4 @@
-package com.cab404.syncronos.eyeofharmony;
+package com.cab404.synchronos.eyeofharmony;
 
 
 /**
