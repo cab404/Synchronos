@@ -1,7 +1,10 @@
-package com.cab404.syncronos;
+package com.cab404.syncronos.impl;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import com.cab404.syncronos.Colours;
+import com.cab404.syncronos.Luna;
+import com.cab404.syncronos.eyeofharmony.TimelineObject;
 
 /**
  * Sorry for no comments!
@@ -12,27 +15,30 @@ import android.graphics.Paint;
 public class CircleTimelineObject implements TimelineObject {
 
     Paint pt = new Paint(Paint.ANTI_ALIAS_FLAG);
-    short diameter = (short) Luna.dp(5);
+    short diameter = (short) Luna.dp(6);
 
     {
         pt.setStrokeWidth(Luna.dp(2));
     }
 
-    private long when;
+    private final long when;
+    private int color = Colours.NUMIX_RED;
 
     public CircleTimelineObject(long when) {
         this.when = when;
     }
 
-    @Override
-    public void draw(Canvas cvs, int x_where, int y_where, double zoom) {
-        pt.setStyle(Paint.Style.FILL);
-        pt.setColor(Colours.NUMIX_GRAY);
-        cvs.drawCircle(x_where, y_where, diameter, pt);
+    public CircleTimelineObject(long when, int color) {
+        this.when = when;
+        this.color = color;
+    }
 
-        pt.setStyle(Paint.Style.STROKE);
-        pt.setColor(Colours.NUMIX_RED);
-        cvs.drawCircle(x_where, y_where, diameter, pt);
+    @Override
+    public void draw(Canvas cvs, int x_where, double zoom) {
+        pt.setStyle(Paint.Style.FILL);
+        pt.setColor(color);
+        cvs.drawCircle(x_where, cvs.getHeight() / 2, diameter, pt);
+
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.cab404.syncronos;
+package com.cab404.syncronos.eyeofharmony;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -6,6 +6,8 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import com.cab404.syncronos.Colours;
+import com.cab404.syncronos.Luna;
 
 /**
  * Sorry for no comments!
@@ -74,6 +76,10 @@ public class TimelineView extends View {
      */
     final static float SHRINK_EXTENT = 5f;
 
+    long loadedExtentStart = Long.MAX_VALUE;
+
+    long loadedExtentEnd = Long.MIN_VALUE;
+
     boolean update_kinetics = false;
 
     @Override
@@ -117,7 +123,7 @@ public class TimelineView extends View {
             System.out.println("DSPoint = " + d_s_p);
 
             if (l_l >= 0)
-                zoom /= l_l / len;
+                setZoom(zoom / (l_l / len));
 
             // Moving initial center to current center
             setTimeOffset(d_s_p - (long) ((c_x / zoom)));
@@ -143,9 +149,26 @@ public class TimelineView extends View {
 
     protected TimelineObjectStorage objects;
     protected Iterable<TimelineObject> current;
+    protected TimelineLayer[] layers;
 
+    public TimelineLayer[] getLayers() {
+        return layers;
+    }
+
+    public void setLayers(TimelineLayer... layers) {
+        this.layers = layers;
+    }
+
+
+    /**
+     * widthInMilliseconds * zoom = widthInPixels
+     */
     protected double zoom = 1;
     protected long timeOffset = 0;
+
+    protected long downBorder = 0;
+    protected long upBorder = System.currentTimeMillis() * 2;
+
 
     protected int color = Colours.NUMIX_RED;
 
@@ -167,8 +190,15 @@ public class TimelineView extends View {
         updateObjects();
     }
 
+
     public void setZoom(double zoom) {
-        this.zoom = zoom;
+        double minimal_zoom = ((double) getWidth()) / (upBorder - downBorder);
+        if (zoom > minimal_zoom) {
+            this.zoom = zoom;
+
+        } else {
+            this.zoom = minimal_zoom;
+        }
     }
 
     public long getTimeOffset() {
@@ -188,9 +218,6 @@ public class TimelineView extends View {
         this.objects = storage;
         updateObjects();
     }
-
-    long loadedExtentStart = Long.MAX_VALUE;
-    long loadedExtentEnd = Long.MIN_VALUE;
 
     public void updateObjects() {
         // Length of visible timeline part
@@ -229,12 +256,13 @@ public class TimelineView extends View {
     public void addToTime(long howmuch) {
         if (howmuch < 0) {
             if (timeOffset + howmuch < 0)
-                timeOffset = 0;
+                timeOffset = downBorder;
             else
                 timeOffset += howmuch;
         } else {
-            if (timeOffset + howmuch < timeOffset)
-                timeOffset = Long.MAX_VALUE;
+            long size = (long) (getWidth() / zoom);
+            if (timeOffset + howmuch > upBorder - size)
+                timeOffset = upBorder - size;
             else
                 timeOffset += howmuch;
         }
@@ -256,14 +284,18 @@ public class TimelineView extends View {
 
         if (isInEditMode()) return;
 
-        int half_height = cv.getHeight() / 2;
+        if (layers != null) {
+            long length = (long) (cv.getWidth() / zoom);
+            for (TimelineLayer layer : layers)
+                layer.draw(timeOffset, timeOffset + length, zoom, cv);
 
-        int how_much = 0;
-        for (TimelineObject obj : current) {
-            how_much++;
-            int start = (int) ((obj.getStartTime() - timeOffset) * zoom);
-            obj.draw(cv, start, half_height, zoom);
         }
+
+        if (current != null)
+            for (TimelineObject obj : current) {
+                int start = (int) ((obj.getStartTime() - timeOffset) * zoom);
+                obj.draw(cv, start, zoom);
+            }
 
         if (update_kinetics) {
             addToTime((long) (kinetic_x / zoom));

@@ -1,4 +1,7 @@
-package com.cab404.syncronos;
+package com.cab404.syncronos.impl;
+
+import com.cab404.syncronos.eyeofharmony.TimelineObject;
+import com.cab404.syncronos.eyeofharmony.TimelineObjectStorage;
 
 import java.util.ArrayList;
 import java.util.List;

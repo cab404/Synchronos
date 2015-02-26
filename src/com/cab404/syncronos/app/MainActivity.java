@@ -1,7 +1,13 @@
-package com.cab404.syncronos;
+package com.cab404.syncronos.app;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
+import com.cab404.syncronos.R;
+import com.cab404.syncronos.eyeofharmony.TimelineView;
+import com.cab404.syncronos.impl.CircleTimelineObject;
+import com.cab404.syncronos.impl.SimpleObjectStorage;
+import com.cab404.syncronos.impl.TimeIndicatorsLayer;
 
 import java.util.concurrent.TimeUnit;
 
@@ -28,12 +34,13 @@ public class MainActivity extends Activity {
         storage.objects.add(new CircleTimelineObject(TimeUnit.DAYS.toMillis(4)));
         storage.objects.add(new CircleTimelineObject(TimeUnit.DAYS.toMillis(40)));
         storage.objects.add(new CircleTimelineObject(TimeUnit.DAYS.toMillis(80)));
-        storage.objects.add(new CircleTimelineObject(TimeUnit.DAYS.toMillis(365)));
-        storage.objects.add(new CircleTimelineObject(TimeUnit.DAYS.toMillis(365 * 10)));
-        storage.objects.add(new CircleTimelineObject(System.currentTimeMillis()));
-        storage.objects.add(new CircleTimelineObject(Long.MAX_VALUE));
+        for (int i = 0; i < 10; i++)
+            storage.objects.add(new CircleTimelineObject(TimeUnit.DAYS.toMillis(365 * i), 0xff377a3b));
+        storage.objects.add(new CircleTimelineObject(System.currentTimeMillis(), Color.GREEN));
 
         timeline.setStorage(storage);
+
+        timeline.setLayers(new TimeIndicatorsLayer());
 
         timeline.setZoom(0.000000005f);
     }

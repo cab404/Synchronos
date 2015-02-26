@@ -1,4 +1,4 @@
-package com.cab404.syncronos;
+package com.cab404.syncronos.eyeofharmony;
 
 
 import android.graphics.Canvas;
@@ -13,13 +13,11 @@ public interface TimelineObject {
 
     /**
      * Draws an object on given canvas with start at x_where:y_where.
-     *
-     * @param cvs     Canvas to draw on
+     *  @param cvs     Canvas to draw on
      * @param x_where X-coordinate of start point on canvas
-     * @param y_where Y-coordinate of start point on canvas
      * @param zoom    Current zoom of the timeline
      */
-    public void draw(Canvas cvs, int x_where, int y_where, double zoom);
+    public void draw(Canvas cvs, int x_where, double zoom);
 
 
     /**
